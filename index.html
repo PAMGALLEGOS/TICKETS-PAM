@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Tickets</title>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold text-center text-gray-700 mb-6">Sistema de Tickets</h2>
+        <div id="login-form">
+            <input type="email" id="email" placeholder="Correo electrónico" class="w-full p-2 mb-3 border rounded">
+            <input type="password" id="password" placeholder="Contraseña" class="w-full p-2 mb-3 border rounded">
+            <button id="login-btn" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Iniciar sesión</button>
+            <button id="register-btn" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 mt-2">Registrarse</button>
+        </div>
+        <p id="error-message" class="text-red-500 text-center mt-3"></p>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tickets-pam.firebaseapp.com",
+            projectId: "tickets-pam",
+            storageBucket: "tickets-pam.appspot.com",
+            messagingSenderId: "886676202646",
+            appId: "1:886676202646:web:a3fb4c8a3e142ed4f40eb7"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        
+        document.getElementById("login-btn").addEventListener("click", () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    window.location.href = "dashboard.html";
+                })
+                .catch((error) => {
+                    document.getElementById("error-message").textContent = error.message;
+                });
+        });
+        
+        document.getElementById("register-btn").addEventListener("click", () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    window.location.href = "dashboard.html";
+                })
+                .catch((error) => {
+                    document.getElementById("error-message").textContent = error.message;
+                });
+        });
+    </script>
+</body>
+</html>

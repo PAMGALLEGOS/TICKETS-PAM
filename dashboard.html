@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Tickets</title>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    
+    <!-- Encabezado de Navegación -->
+    <nav class="bg-blue-600 p-4 text-white flex justify-between">
+        <h1 class="text-xl font-bold">Sistema de Tickets</h1>
+        <ul class="flex space-x-4">
+            <li><a href="dashboard.html" class="hover:underline">Dashboard</a></li>
+            <li><a href="crear_ticket.html" class="hover:underline">Crear Ticket</a></li>
+            <li><a href="tickets.html" class="hover:underline">Mis Tickets</a></li>
+            <li><a href="perfil.html" class="hover:underline">Perfil</a></li>
+            <li><button id="logout-btn" class="bg-red-500 px-3 py-1 rounded">Cerrar sesión</button></li>
+        </ul>
+    </nav>
+    
+    <!-- Contenedor principal -->
+    <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-700">Dashboard</h2>
+        <p class="text-gray-600">Bienvenido al sistema de tickets.</p>
+        
+        <!-- Gráficos de Tickets -->
+        <div class="mt-6">
+            <canvas id="ticketChart"></canvas>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tickets-pam.firebaseapp.com",
+            projectId: "tickets-pam",
+            storageBucket: "tickets-pam.appspot.com",
+            messagingSenderId: "886676202646",
+            appId: "1:886676202646:web:a3fb4c8a3e142ed4f40eb7"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+        
+        // Verificar autenticación y redirigir si no está autenticado
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        });
+        
+        // Cerrar sesión
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            });
+        });
+        
+        // Obtener datos de tickets y mostrar en gráfico
+        async function loadChart() {
+            const ticketsRef = collection(db, "tickets");
+            const snapshot = await getDocs(ticketsRef);
+            let abiertos = 0, cerrados = 0, enProceso = 0;
+            
+            snapshot.forEach(doc => {
+                const estado = doc.data().estado;
+                if (estado === "Abierto") abiertos++;
+                if (estado === "Cerrado") cerrados++;
+                if (estado === "En Proceso") enProceso++;
+            });
+            
+            new Chart(document.getElementById("ticketChart"), {
+                type: 'doughnut',
+                data: {
+                    labels: ["Abiertos", "Cerrados", "En Proceso"],
+                    datasets: [{
+                        data: [abiertos, cerrados, enProceso],
+                        backgroundColor: ["#3B82F6", "#10B981", "#F59E0B"]
+                    }]
+                }
+            });
+        }
+        
+        loadChart();
+    </script>
+</body>
+</html>
